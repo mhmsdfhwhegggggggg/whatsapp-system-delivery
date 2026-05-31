@@ -9,5 +9,6 @@
 export interface QrCode {
   /** @nullable */
   qr: string | null;
-  status?: string;
+  /** @nullable */
+  status?: string | null;
 }

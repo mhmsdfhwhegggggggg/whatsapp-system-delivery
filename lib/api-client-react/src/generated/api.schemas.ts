@@ -27,18 +27,40 @@ export interface Session {
   status: SessionStatus;
   dailySentCount?: number;
   dailyLimit?: number;
+  warmupMode?: boolean;
+  warmupDay?: number;
+  sendHourStart?: number;
+  sendHourEnd?: number;
+  consecutiveFailures?: number;
   createdAt: string;
 }
 
 export interface SessionInput {
   name: string;
   dailyLimit?: number;
+  warmupMode?: boolean;
+  sendHourStart?: number;
+  sendHourEnd?: number;
 }
 
 export interface QrCode {
   /** @nullable */
   qr: string | null;
-  status?: string;
+  /** @nullable */
+  status?: string | null;
+}
+
+export interface BlacklistEntry {
+  id: number;
+  phone: string;
+  /** @nullable */
+  reason?: string | null;
+  createdAt: string;
+}
+
+export interface BlacklistInput {
+  phone: string;
+  reason?: string;
 }
 
 export interface ContactGroup {
@@ -158,6 +180,14 @@ export interface Campaign {
   delayMin?: number;
   /** Max delay between messages in seconds */
   delayMax?: number;
+  /** Number of messages before a long pause */
+  batchSize?: number;
+  /** Duration of the long pause in seconds */
+  batchPauseSeconds?: number;
+  /** Add subtle variation to each message */
+  enableVariation?: boolean;
+  /** Auto-pause campaign if ban is detected */
+  stopOnBan?: boolean;
   sentCount: number;
   deliveredCount: number;
   failedCount: number;
@@ -178,6 +208,10 @@ export interface CampaignInput {
   sessionId?: number;
   delayMin?: number;
   delayMax?: number;
+  batchSize?: number;
+  batchPauseSeconds?: number;
+  enableVariation?: boolean;
+  stopOnBan?: boolean;
   scheduledAt?: string;
 }
 
@@ -188,6 +222,10 @@ export interface CampaignUpdate {
   sessionId?: number;
   delayMin?: number;
   delayMax?: number;
+  batchSize?: number;
+  batchPauseSeconds?: number;
+  enableVariation?: boolean;
+  stopOnBan?: boolean;
   scheduledAt?: string;
 }
 
@@ -199,6 +237,7 @@ export const MessageLogStatus = {
   sent: 'sent',
   delivered: 'delivered',
   failed: 'failed',
+  skipped: 'skipped',
 } as const;
 
 export interface MessageLog {

@@ -21,6 +21,14 @@ export interface Campaign {
   delayMin?: number;
   /** Max delay between messages in seconds */
   delayMax?: number;
+  /** Number of messages before a long pause */
+  batchSize?: number;
+  /** Duration of the long pause in seconds */
+  batchPauseSeconds?: number;
+  /** Add subtle variation to each message */
+  enableVariation?: boolean;
+  /** Auto-pause campaign if ban is detected */
+  stopOnBan?: boolean;
   sentCount: number;
   deliveredCount: number;
   failedCount: number;

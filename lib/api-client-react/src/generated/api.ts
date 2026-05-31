@@ -21,6 +21,8 @@ import type {
 
 import type {
   AnalyticsOverview,
+  BlacklistEntry,
+  BlacklistInput,
   Campaign,
   CampaignInput,
   CampaignStat,
@@ -501,6 +503,224 @@ export function useGetSessionQr<TData = Awaited<ReturnType<typeof getSessionQr>>
 
 
 
+
+export const getListBlacklistUrl = () => {
+
+
+
+
+  return `/api/blacklist`
+}
+
+/**
+ * @summary List blacklisted phone numbers
+ */
+export const listBlacklist = async ( options?: RequestInit): Promise<BlacklistEntry[]> => {
+
+  return customFetch<BlacklistEntry[]>(getListBlacklistUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListBlacklistQueryKey = () => {
+    return [
+    `/api/blacklist`
+    ] as const;
+    }
+
+
+export const getListBlacklistQueryOptions = <TData = Awaited<ReturnType<typeof listBlacklist>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listBlacklist>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListBlacklistQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listBlacklist>>> = ({ signal }) => listBlacklist({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listBlacklist>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListBlacklistQueryResult = NonNullable<Awaited<ReturnType<typeof listBlacklist>>>
+export type ListBlacklistQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List blacklisted phone numbers
+ */
+
+export function useListBlacklist<TData = Awaited<ReturnType<typeof listBlacklist>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listBlacklist>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListBlacklistQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getAddToBlacklistUrl = () => {
+
+
+
+
+  return `/api/blacklist`
+}
+
+/**
+ * @summary Add a phone number to the blacklist
+ */
+export const addToBlacklist = async (blacklistInput: BlacklistInput, options?: RequestInit): Promise<BlacklistEntry> => {
+
+  return customFetch<BlacklistEntry>(getAddToBlacklistUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      blacklistInput,)
+  }
+);}
+
+
+
+
+export const getAddToBlacklistMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addToBlacklist>>, TError,{data: BodyType<BlacklistInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addToBlacklist>>, TError,{data: BodyType<BlacklistInput>}, TContext> => {
+
+const mutationKey = ['addToBlacklist'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addToBlacklist>>, {data: BodyType<BlacklistInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  addToBlacklist(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddToBlacklistMutationResult = NonNullable<Awaited<ReturnType<typeof addToBlacklist>>>
+    export type AddToBlacklistMutationBody = BodyType<BlacklistInput>
+    export type AddToBlacklistMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Add a phone number to the blacklist
+ */
+export const useAddToBlacklist = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addToBlacklist>>, TError,{data: BodyType<BlacklistInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof addToBlacklist>>,
+        TError,
+        {data: BodyType<BlacklistInput>},
+        TContext
+      > => {
+      return useMutation(getAddToBlacklistMutationOptions(options));
+    }
+
+export const getRemoveFromBlacklistUrl = (id: number,) => {
+
+
+
+
+  return `/api/blacklist/${id}`
+}
+
+/**
+ * @summary Remove a number from the blacklist
+ */
+export const removeFromBlacklist = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getRemoveFromBlacklistUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getRemoveFromBlacklistMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeFromBlacklist>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof removeFromBlacklist>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['removeFromBlacklist'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeFromBlacklist>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  removeFromBlacklist(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemoveFromBlacklistMutationResult = NonNullable<Awaited<ReturnType<typeof removeFromBlacklist>>>
+
+    export type RemoveFromBlacklistMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Remove a number from the blacklist
+ */
+export const useRemoveFromBlacklist = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeFromBlacklist>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof removeFromBlacklist>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getRemoveFromBlacklistMutationOptions(options));
+    }
 
 export const getListContactGroupsUrl = () => {
 
@@ -1236,83 +1456,6 @@ export const useCreateTemplate = <TError = ErrorType<unknown>,
       return useMutation(getCreateTemplateMutationOptions(options));
     }
 
-export const getGetTemplateUrl = (id: number,) => {
-
-
-
-
-  return `/api/templates/${id}`
-}
-
-/**
- * @summary Get a template
- */
-export const getTemplate = async (id: number, options?: RequestInit): Promise<Template> => {
-
-  return customFetch<Template>(getGetTemplateUrl(id),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetTemplateQueryKey = (id: number,) => {
-    return [
-    `/api/templates/${id}`
-    ] as const;
-    }
-
-
-export const getGetTemplateQueryOptions = <TData = Awaited<ReturnType<typeof getTemplate>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTemplate>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetTemplateQueryKey(id);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTemplate>>> = ({ signal }) => getTemplate(id, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTemplate>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type GetTemplateQueryResult = NonNullable<Awaited<ReturnType<typeof getTemplate>>>
-export type GetTemplateQueryError = ErrorType<unknown>
-
-
-/**
- * @summary Get a template
- */
-
-export function useGetTemplate<TData = Awaited<ReturnType<typeof getTemplate>>, TError = ErrorType<unknown>>(
- id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTemplate>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getGetTemplateQueryOptions(id,options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-
-
 export const getUpdateTemplateUrl = (id: number,) => {
 
 
@@ -1612,7 +1755,7 @@ export const getGetCampaignUrl = (id: number,) => {
 }
 
 /**
- * @summary Get a campaign
+ * @summary Get a campaign by ID
  */
 export const getCampaign = async (id: number, options?: RequestInit): Promise<Campaign> => {
 
@@ -1636,7 +1779,7 @@ export const getGetCampaignQueryKey = (id: number,) => {
     }
 
 
-export const getGetCampaignQueryOptions = <TData = Awaited<ReturnType<typeof getCampaign>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCampaign>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetCampaignQueryOptions = <TData = Awaited<ReturnType<typeof getCampaign>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCampaign>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -1655,14 +1798,14 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type GetCampaignQueryResult = NonNullable<Awaited<ReturnType<typeof getCampaign>>>
-export type GetCampaignQueryError = ErrorType<unknown>
+export type GetCampaignQueryError = ErrorType<void>
 
 
 /**
- * @summary Get a campaign
+ * @summary Get a campaign by ID
  */
 
-export function useGetCampaign<TData = Awaited<ReturnType<typeof getCampaign>>, TError = ErrorType<unknown>>(
+export function useGetCampaign<TData = Awaited<ReturnType<typeof getCampaign>>, TError = ErrorType<void>>(
  id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCampaign>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -1831,7 +1974,7 @@ export const getStartCampaignUrl = (id: number,) => {
 }
 
 /**
- * @summary Start sending a campaign
+ * @summary Start a campaign
  */
 export const startCampaign = async (id: number, options?: RequestInit): Promise<Campaign> => {
 
@@ -1879,7 +2022,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type StartCampaignMutationError = ErrorType<unknown>
 
     /**
- * @summary Start sending a campaign
+ * @summary Start a campaign
  */
 export const useStartCampaign = <TError = ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startCampaign>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -1901,7 +2044,7 @@ export const getPauseCampaignUrl = (id: number,) => {
 }
 
 /**
- * @summary Pause a running campaign
+ * @summary Pause a campaign
  */
 export const pauseCampaign = async (id: number, options?: RequestInit): Promise<Campaign> => {
 
@@ -1949,7 +2092,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type PauseCampaignMutationError = ErrorType<unknown>
 
     /**
- * @summary Pause a running campaign
+ * @summary Pause a campaign
  */
 export const usePauseCampaign = <TError = ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof pauseCampaign>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -2041,7 +2184,7 @@ export const getListCampaignMessagesUrl = (id: number,) => {
 }
 
 /**
- * @summary Get message delivery log for a campaign
+ * @summary List message logs for a campaign
  */
 export const listCampaignMessages = async (id: number, options?: RequestInit): Promise<MessageLog[]> => {
 
@@ -2088,7 +2231,7 @@ export type ListCampaignMessagesQueryError = ErrorType<unknown>
 
 
 /**
- * @summary Get message delivery log for a campaign
+ * @summary List message logs for a campaign
  */
 
 export function useListCampaignMessages<TData = Awaited<ReturnType<typeof listCampaignMessages>>, TError = ErrorType<unknown>>(

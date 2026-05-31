@@ -26,6 +26,11 @@ export const ListSessionsResponseItem = zod.object({
   "status": zod.enum(['disconnected', 'connecting', 'connected', 'banned']),
   "dailySentCount": zod.number().optional(),
   "dailyLimit": zod.number().optional(),
+  "warmupMode": zod.boolean().optional(),
+  "warmupDay": zod.number().optional(),
+  "sendHourStart": zod.number().optional(),
+  "sendHourEnd": zod.number().optional(),
+  "consecutiveFailures": zod.number().optional(),
   "createdAt": zod.coerce.date()
 })
 export const ListSessionsResponse = zod.array(ListSessionsResponseItem)
@@ -36,7 +41,10 @@ export const ListSessionsResponse = zod.array(ListSessionsResponseItem)
  */
 export const CreateSessionBody = zod.object({
   "name": zod.string(),
-  "dailyLimit": zod.number().optional()
+  "dailyLimit": zod.number().optional(),
+  "warmupMode": zod.boolean().optional(),
+  "sendHourStart": zod.number().optional(),
+  "sendHourEnd": zod.number().optional()
 })
 
 
@@ -54,6 +62,11 @@ export const GetSessionResponse = zod.object({
   "status": zod.enum(['disconnected', 'connecting', 'connected', 'banned']),
   "dailySentCount": zod.number().optional(),
   "dailyLimit": zod.number().optional(),
+  "warmupMode": zod.boolean().optional(),
+  "warmupDay": zod.number().optional(),
+  "sendHourStart": zod.number().optional(),
+  "sendHourEnd": zod.number().optional(),
+  "consecutiveFailures": zod.number().optional(),
   "createdAt": zod.coerce.date()
 })
 
@@ -75,7 +88,36 @@ export const GetSessionQrParams = zod.object({
 
 export const GetSessionQrResponse = zod.object({
   "qr": zod.string().nullable(),
-  "status": zod.string().optional()
+  "status": zod.string().nullish()
+})
+
+
+/**
+ * @summary List blacklisted phone numbers
+ */
+export const ListBlacklistResponseItem = zod.object({
+  "id": zod.number(),
+  "phone": zod.string(),
+  "reason": zod.string().nullish(),
+  "createdAt": zod.coerce.date()
+})
+export const ListBlacklistResponse = zod.array(ListBlacklistResponseItem)
+
+
+/**
+ * @summary Add a phone number to the blacklist
+ */
+export const AddToBlacklistBody = zod.object({
+  "phone": zod.string(),
+  "reason": zod.string().optional()
+})
+
+
+/**
+ * @summary Remove a number from the blacklist
+ */
+export const RemoveFromBlacklistParams = zod.object({
+  "id": zod.coerce.number()
 })
 
 
@@ -210,24 +252,6 @@ export const CreateTemplateBody = zod.object({
 
 
 /**
- * @summary Get a template
- */
-export const GetTemplateParams = zod.object({
-  "id": zod.coerce.number()
-})
-
-export const GetTemplateResponse = zod.object({
-  "id": zod.number(),
-  "name": zod.string(),
-  "content": zod.string(),
-  "variables": zod.array(zod.string()).optional(),
-  "mediaType": zod.union([zod.literal('image'),zod.literal('video'),zod.literal('document'),zod.literal(null)]).nullish(),
-  "mediaUrl": zod.string().nullish(),
-  "createdAt": zod.coerce.date()
-})
-
-
-/**
  * @summary Update a template
  */
 export const UpdateTemplateParams = zod.object({
@@ -272,6 +296,10 @@ export const ListCampaignsResponseItem = zod.object({
   "status": zod.enum(['draft', 'running', 'paused', 'completed', 'failed']),
   "delayMin": zod.number().optional().describe('Min delay between messages in seconds'),
   "delayMax": zod.number().optional().describe('Max delay between messages in seconds'),
+  "batchSize": zod.number().optional().describe('Number of messages before a long pause'),
+  "batchPauseSeconds": zod.number().optional().describe('Duration of the long pause in seconds'),
+  "enableVariation": zod.boolean().optional().describe('Add subtle variation to each message'),
+  "stopOnBan": zod.boolean().optional().describe('Auto-pause campaign if ban is detected'),
   "sentCount": zod.number(),
   "deliveredCount": zod.number(),
   "failedCount": zod.number(),
@@ -294,12 +322,16 @@ export const CreateCampaignBody = zod.object({
   "sessionId": zod.number().optional(),
   "delayMin": zod.number().optional(),
   "delayMax": zod.number().optional(),
+  "batchSize": zod.number().optional(),
+  "batchPauseSeconds": zod.number().optional(),
+  "enableVariation": zod.boolean().optional(),
+  "stopOnBan": zod.boolean().optional(),
   "scheduledAt": zod.coerce.date().optional()
 })
 
 
 /**
- * @summary Get a campaign
+ * @summary Get a campaign by ID
  */
 export const GetCampaignParams = zod.object({
   "id": zod.coerce.number()
@@ -314,6 +346,10 @@ export const GetCampaignResponse = zod.object({
   "status": zod.enum(['draft', 'running', 'paused', 'completed', 'failed']),
   "delayMin": zod.number().optional().describe('Min delay between messages in seconds'),
   "delayMax": zod.number().optional().describe('Max delay between messages in seconds'),
+  "batchSize": zod.number().optional().describe('Number of messages before a long pause'),
+  "batchPauseSeconds": zod.number().optional().describe('Duration of the long pause in seconds'),
+  "enableVariation": zod.boolean().optional().describe('Add subtle variation to each message'),
+  "stopOnBan": zod.boolean().optional().describe('Auto-pause campaign if ban is detected'),
   "sentCount": zod.number(),
   "deliveredCount": zod.number(),
   "failedCount": zod.number(),
@@ -339,6 +375,10 @@ export const UpdateCampaignBody = zod.object({
   "sessionId": zod.number().optional(),
   "delayMin": zod.number().optional(),
   "delayMax": zod.number().optional(),
+  "batchSize": zod.number().optional(),
+  "batchPauseSeconds": zod.number().optional(),
+  "enableVariation": zod.boolean().optional(),
+  "stopOnBan": zod.boolean().optional(),
   "scheduledAt": zod.coerce.date().optional()
 })
 
@@ -351,6 +391,10 @@ export const UpdateCampaignResponse = zod.object({
   "status": zod.enum(['draft', 'running', 'paused', 'completed', 'failed']),
   "delayMin": zod.number().optional().describe('Min delay between messages in seconds'),
   "delayMax": zod.number().optional().describe('Max delay between messages in seconds'),
+  "batchSize": zod.number().optional().describe('Number of messages before a long pause'),
+  "batchPauseSeconds": zod.number().optional().describe('Duration of the long pause in seconds'),
+  "enableVariation": zod.boolean().optional().describe('Add subtle variation to each message'),
+  "stopOnBan": zod.boolean().optional().describe('Auto-pause campaign if ban is detected'),
   "sentCount": zod.number(),
   "deliveredCount": zod.number(),
   "failedCount": zod.number(),
@@ -371,7 +415,7 @@ export const DeleteCampaignParams = zod.object({
 
 
 /**
- * @summary Start sending a campaign
+ * @summary Start a campaign
  */
 export const StartCampaignParams = zod.object({
   "id": zod.coerce.number()
@@ -386,6 +430,10 @@ export const StartCampaignResponse = zod.object({
   "status": zod.enum(['draft', 'running', 'paused', 'completed', 'failed']),
   "delayMin": zod.number().optional().describe('Min delay between messages in seconds'),
   "delayMax": zod.number().optional().describe('Max delay between messages in seconds'),
+  "batchSize": zod.number().optional().describe('Number of messages before a long pause'),
+  "batchPauseSeconds": zod.number().optional().describe('Duration of the long pause in seconds'),
+  "enableVariation": zod.boolean().optional().describe('Add subtle variation to each message'),
+  "stopOnBan": zod.boolean().optional().describe('Auto-pause campaign if ban is detected'),
   "sentCount": zod.number(),
   "deliveredCount": zod.number(),
   "failedCount": zod.number(),
@@ -398,7 +446,7 @@ export const StartCampaignResponse = zod.object({
 
 
 /**
- * @summary Pause a running campaign
+ * @summary Pause a campaign
  */
 export const PauseCampaignParams = zod.object({
   "id": zod.coerce.number()
@@ -413,6 +461,10 @@ export const PauseCampaignResponse = zod.object({
   "status": zod.enum(['draft', 'running', 'paused', 'completed', 'failed']),
   "delayMin": zod.number().optional().describe('Min delay between messages in seconds'),
   "delayMax": zod.number().optional().describe('Max delay between messages in seconds'),
+  "batchSize": zod.number().optional().describe('Number of messages before a long pause'),
+  "batchPauseSeconds": zod.number().optional().describe('Duration of the long pause in seconds'),
+  "enableVariation": zod.boolean().optional().describe('Add subtle variation to each message'),
+  "stopOnBan": zod.boolean().optional().describe('Auto-pause campaign if ban is detected'),
   "sentCount": zod.number(),
   "deliveredCount": zod.number(),
   "failedCount": zod.number(),
@@ -440,6 +492,10 @@ export const ResumeCampaignResponse = zod.object({
   "status": zod.enum(['draft', 'running', 'paused', 'completed', 'failed']),
   "delayMin": zod.number().optional().describe('Min delay between messages in seconds'),
   "delayMax": zod.number().optional().describe('Max delay between messages in seconds'),
+  "batchSize": zod.number().optional().describe('Number of messages before a long pause'),
+  "batchPauseSeconds": zod.number().optional().describe('Duration of the long pause in seconds'),
+  "enableVariation": zod.boolean().optional().describe('Add subtle variation to each message'),
+  "stopOnBan": zod.boolean().optional().describe('Auto-pause campaign if ban is detected'),
   "sentCount": zod.number(),
   "deliveredCount": zod.number(),
   "failedCount": zod.number(),
@@ -452,7 +508,7 @@ export const ResumeCampaignResponse = zod.object({
 
 
 /**
- * @summary Get message delivery log for a campaign
+ * @summary List message logs for a campaign
  */
 export const ListCampaignMessagesParams = zod.object({
   "id": zod.coerce.number()
@@ -463,7 +519,7 @@ export const ListCampaignMessagesResponseItem = zod.object({
   "campaignId": zod.number(),
   "phone": zod.string(),
   "contactName": zod.string().nullish(),
-  "status": zod.enum(['pending', 'sent', 'delivered', 'failed']),
+  "status": zod.enum(['pending', 'sent', 'delivered', 'failed', 'skipped']),
   "errorMessage": zod.string().nullish(),
   "sentAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date()

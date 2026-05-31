@@ -4,11 +4,11 @@ import { templatesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import {
   CreateTemplateBody,
-  GetTemplateParams,
   UpdateTemplateParams,
   UpdateTemplateBody,
   DeleteTemplateParams,
 } from "@workspace/api-zod";
+const GetTemplateParams = DeleteTemplateParams;
 
 const router = Router();
 

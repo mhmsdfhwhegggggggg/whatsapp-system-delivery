@@ -13,5 +13,9 @@ export interface CampaignUpdate {
   sessionId?: number;
   delayMin?: number;
   delayMax?: number;
+  batchSize?: number;
+  batchPauseSeconds?: number;
+  enableVariation?: boolean;
+  stopOnBan?: boolean;
   scheduledAt?: Date;
 }

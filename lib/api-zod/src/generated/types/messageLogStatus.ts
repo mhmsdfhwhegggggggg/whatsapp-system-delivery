@@ -14,4 +14,5 @@ export const MessageLogStatus = {
   sent: 'sent',
   delivered: 'delivered',
   failed: 'failed',
+  skipped: 'skipped',
 } as const;

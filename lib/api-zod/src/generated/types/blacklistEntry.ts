@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface SessionInput {
-  name: string;
-  dailyLimit?: number;
-  warmupMode?: boolean;
-  sendHourStart?: number;
-  sendHourEnd?: number;
+export interface BlacklistEntry {
+  id: number;
+  phone: string;
+  /** @nullable */
+  reason?: string | null;
+  createdAt: Date;
 }

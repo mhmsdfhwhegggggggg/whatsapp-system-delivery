@@ -15,5 +15,10 @@ export interface Session {
   status: SessionStatus;
   dailySentCount?: number;
   dailyLimit?: number;
+  warmupMode?: boolean;
+  warmupDay?: number;
+  sendHourStart?: number;
+  sendHourEnd?: number;
+  consecutiveFailures?: number;
   createdAt: Date;
 }

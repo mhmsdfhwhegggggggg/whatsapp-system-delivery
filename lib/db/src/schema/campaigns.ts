@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, boolean, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { contactGroupsTable } from "./contacts";
@@ -14,6 +14,12 @@ export const campaignsTable = pgTable("campaigns", {
   status: text("status").notNull().default("draft"), // draft | running | paused | completed | failed
   delayMin: integer("delay_min").notNull().default(5),
   delayMax: integer("delay_max").notNull().default(15),
+  // Anti-ban settings
+  batchSize: integer("batch_size").notNull().default(10),
+  batchPauseSeconds: integer("batch_pause_seconds").notNull().default(120),
+  enableVariation: boolean("enable_variation").notNull().default(true),
+  stopOnBan: boolean("stop_on_ban").notNull().default(true),
+  // Counters
   sentCount: integer("sent_count").notNull().default(0),
   deliveredCount: integer("delivered_count").notNull().default(0),
   failedCount: integer("failed_count").notNull().default(0),
@@ -29,7 +35,7 @@ export const messageLogsTable = pgTable("message_logs", {
   campaignId: integer("campaign_id").notNull().references(() => campaignsTable.id, { onDelete: "cascade" }),
   phone: text("phone").notNull(),
   contactName: text("contact_name"),
-  status: text("status").notNull().default("pending"), // pending | sent | delivered | failed
+  status: text("status").notNull().default("pending"), // pending | sent | delivered | failed | skipped
   errorMessage: text("error_message"),
   sentAt: timestamp("sent_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),

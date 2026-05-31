@@ -7,6 +7,8 @@
  */
 
 export * from './analyticsOverview';
+export * from './blacklistEntry';
+export * from './blacklistInput';
 export * from './campaign';
 export * from './campaignInput';
 export * from './campaignStat';
