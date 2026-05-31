@@ -1,22 +1,31 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: WhatsApp Bulk Messaging System API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: sessions
+    description: WhatsApp session management
+  - name: contacts
+    description: Contact list management
+  - name: templates
+    description: Message template management
+  - name: campaigns
+    description: Campaign management
+  - name: analytics
+    description: Analytics and reporting
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +33,852 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ── Sessions ──────────────────────────────────────────────────────────────
+  /sessions:
+    get:
+      operationId: listSessions
+      tags: [sessions]
+      summary: List all WhatsApp sessions
+      responses:
+        "200":
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Session"
+    post:
+      operationId: createSession
+      tags: [sessions]
+      summary: Create a new WhatsApp session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionInput"
+      responses:
+        "201":
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+
+  /sessions/{id}:
+    get:
+      operationId: getSession
+      tags: [sessions]
+      summary: Get a session by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Session details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteSession
+      tags: [sessions]
+      summary: Delete a session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /sessions/{id}/qr:
+    get:
+      operationId: getSessionQr
+      tags: [sessions]
+      summary: Get QR code for session authentication
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: QR code data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QrCode"
+
+  # ── Contact Groups ─────────────────────────────────────────────────────────
+  /contact-groups:
+    get:
+      operationId: listContactGroups
+      tags: [contacts]
+      summary: List all contact groups
+      responses:
+        "200":
+          description: List of contact groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContactGroup"
+    post:
+      operationId: createContactGroup
+      tags: [contacts]
+      summary: Create a contact group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactGroupInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactGroup"
+
+  /contact-groups/{id}:
+    get:
+      operationId: getContactGroup
+      tags: [contacts]
+      summary: Get a contact group
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Contact group
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactGroup"
+    delete:
+      operationId: deleteContactGroup
+      tags: [contacts]
+      summary: Delete a contact group
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /contact-groups/{id}/contacts:
+    get:
+      operationId: listContacts
+      tags: [contacts]
+      summary: List contacts in a group
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of contacts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Contact"
+    post:
+      operationId: addContact
+      tags: [contacts]
+      summary: Add a contact to a group
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactInput"
+      responses:
+        "201":
+          description: Contact added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+
+  /contact-groups/{id}/import:
+    post:
+      operationId: importContacts
+      tags: [contacts]
+      summary: Import contacts from CSV data
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactImport"
+      responses:
+        "200":
+          description: Import result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportResult"
+
+  /contacts/{id}:
+    delete:
+      operationId: deleteContact
+      tags: [contacts]
+      summary: Delete a contact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── Templates ─────────────────────────────────────────────────────────────
+  /templates:
+    get:
+      operationId: listTemplates
+      tags: [templates]
+      summary: List all message templates
+      responses:
+        "200":
+          description: List of templates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Template"
+    post:
+      operationId: createTemplate
+      tags: [templates]
+      summary: Create a message template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TemplateInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Template"
+
+  /templates/{id}:
+    get:
+      operationId: getTemplate
+      tags: [templates]
+      summary: Get a template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Template
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Template"
+    patch:
+      operationId: updateTemplate
+      tags: [templates]
+      summary: Update a template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TemplateUpdate"
+      responses:
+        "200":
+          description: Updated template
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Template"
+    delete:
+      operationId: deleteTemplate
+      tags: [templates]
+      summary: Delete a template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── Campaigns ─────────────────────────────────────────────────────────────
+  /campaigns:
+    get:
+      operationId: listCampaigns
+      tags: [campaigns]
+      summary: List all campaigns
+      responses:
+        "200":
+          description: List of campaigns
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Campaign"
+    post:
+      operationId: createCampaign
+      tags: [campaigns]
+      summary: Create a campaign
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CampaignInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Campaign"
+
+  /campaigns/{id}:
+    get:
+      operationId: getCampaign
+      tags: [campaigns]
+      summary: Get a campaign
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Campaign
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Campaign"
+    patch:
+      operationId: updateCampaign
+      tags: [campaigns]
+      summary: Update a campaign
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CampaignUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Campaign"
+    delete:
+      operationId: deleteCampaign
+      tags: [campaigns]
+      summary: Delete a campaign
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /campaigns/{id}/start:
+    post:
+      operationId: startCampaign
+      tags: [campaigns]
+      summary: Start sending a campaign
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Campaign started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Campaign"
+
+  /campaigns/{id}/pause:
+    post:
+      operationId: pauseCampaign
+      tags: [campaigns]
+      summary: Pause a running campaign
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Campaign paused
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Campaign"
+
+  /campaigns/{id}/resume:
+    post:
+      operationId: resumeCampaign
+      tags: [campaigns]
+      summary: Resume a paused campaign
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Campaign resumed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Campaign"
+
+  /campaigns/{id}/messages:
+    get:
+      operationId: listCampaignMessages
+      tags: [campaigns]
+      summary: Get message delivery log for a campaign
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Message log
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MessageLog"
+
+  # ── Analytics ─────────────────────────────────────────────────────────────
+  /analytics/overview:
+    get:
+      operationId: getAnalyticsOverview
+      tags: [analytics]
+      summary: Get overall dashboard stats
+      responses:
+        "200":
+          description: Overview stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyticsOverview"
+
+  /analytics/campaigns:
+    get:
+      operationId: getCampaignStats
+      tags: [analytics]
+      summary: Get per-campaign stats summary
+      responses:
+        "200":
+          description: Campaign stats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CampaignStat"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    # ── Sessions ──────────────────────────────────────────────────────────
+    Session:
+      type: object
+      required: [id, name, status, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [disconnected, connecting, connected, banned]
+        dailySentCount:
+          type: integer
+        dailyLimit:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    SessionInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        dailyLimit:
+          type: integer
+
+    QrCode:
+      type: object
+      required: [qr]
+      properties:
+        qr:
+          type: ["string", "null"]
+        status:
+          type: string
+
+    # ── Contacts ──────────────────────────────────────────────────────────
+    ContactGroup:
+      type: object
+      required: [id, name, contactCount, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        contactCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    ContactGroupInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    Contact:
+      type: object
+      required: [id, groupId, phone, createdAt]
+      properties:
+        id:
+          type: integer
+        groupId:
+          type: integer
+        phone:
+          type: string
+        name:
+          type: ["string", "null"]
+        variables:
+          type: object
+          additionalProperties:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ContactInput:
+      type: object
+      required: [phone]
+      properties:
+        phone:
+          type: string
+        name:
+          type: string
+        variables:
+          type: object
+          additionalProperties:
+            type: string
+
+    ContactImport:
+      type: object
+      required: [csvData]
+      properties:
+        csvData:
+          type: string
+          description: Raw CSV text with headers (phone required, name/other fields optional)
+
+    ImportResult:
+      type: object
+      required: [imported, duplicates, errors]
+      properties:
+        imported:
+          type: integer
+        duplicates:
+          type: integer
+        errors:
+          type: integer
+
+    # ── Templates ─────────────────────────────────────────────────────────
+    Template:
+      type: object
+      required: [id, name, content, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        content:
+          type: string
+        variables:
+          type: array
+          items:
+            type: string
+        mediaType:
+          type: ["string", "null"]
+          enum: ["image", "video", "document", null]
+        mediaUrl:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    TemplateInput:
+      type: object
+      required: [name, content]
+      properties:
+        name:
+          type: string
+        content:
+          type: string
+        mediaType:
+          type: string
+          enum: [image, video, document]
+        mediaUrl:
+          type: string
+
+    TemplateUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        content:
+          type: string
+        mediaType:
+          type: string
+        mediaUrl:
+          type: string
+
+    # ── Campaigns ─────────────────────────────────────────────────────────
+    Campaign:
+      type: object
+      required: [id, name, status, sentCount, deliveredCount, failedCount, totalCount, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        templateId:
+          type: ["integer", "null"]
+        contactGroupId:
+          type: ["integer", "null"]
+        sessionId:
+          type: ["integer", "null"]
+        status:
+          type: string
+          enum: [draft, running, paused, completed, failed]
+        delayMin:
+          type: integer
+          description: Min delay between messages in seconds
+        delayMax:
+          type: integer
+          description: Max delay between messages in seconds
+        sentCount:
+          type: integer
+        deliveredCount:
+          type: integer
+        failedCount:
+          type: integer
+        totalCount:
+          type: integer
+        scheduledAt:
+          type: ["string", "null"]
+          format: date-time
+        startedAt:
+          type: ["string", "null"]
+          format: date-time
+        completedAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    CampaignInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        templateId:
+          type: integer
+        contactGroupId:
+          type: integer
+        sessionId:
+          type: integer
+        delayMin:
+          type: integer
+        delayMax:
+          type: integer
+        scheduledAt:
+          type: string
+          format: date-time
+
+    CampaignUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        templateId:
+          type: integer
+        contactGroupId:
+          type: integer
+        sessionId:
+          type: integer
+        delayMin:
+          type: integer
+        delayMax:
+          type: integer
+        scheduledAt:
+          type: string
+          format: date-time
+
+    MessageLog:
+      type: object
+      required: [id, campaignId, phone, status, createdAt]
+      properties:
+        id:
+          type: integer
+        campaignId:
+          type: integer
+        phone:
+          type: string
+        contactName:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, sent, delivered, failed]
+        errorMessage:
+          type: ["string", "null"]
+        sentAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    # ── Analytics ─────────────────────────────────────────────────────────
+    AnalyticsOverview:
+      type: object
+      required: [totalCampaigns, activeCampaigns, totalMessagesSent, totalDelivered, totalFailed, totalContacts, successRate]
+      properties:
+        totalCampaigns:
+          type: integer
+        activeCampaigns:
+          type: integer
+        totalMessagesSent:
+          type: integer
+        totalDelivered:
+          type: integer
+        totalFailed:
+          type: integer
+        totalContacts:
+          type: integer
+        successRate:
+          type: number
+        connectedSessions:
+          type: integer
+
+    CampaignStat:
+      type: object
+      required: [id, name, status, sentCount, deliveredCount, failedCount, totalCount, successRate]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        status:
+          type: string
+        sentCount:
+          type: integer
+        deliveredCount:
+          type: integer
+        failedCount:
+          type: integer
+        totalCount:
+          type: integer
+        successRate:
+          type: number
+        createdAt:
+          type: string
+          format: date-time

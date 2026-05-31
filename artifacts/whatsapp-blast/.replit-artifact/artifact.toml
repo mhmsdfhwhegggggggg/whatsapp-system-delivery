@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "WhatsApp Bulk Sender"
+version = "1.0.0"
+id = "artifacts/whatsapp-blast"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24101
+
+[services.development]
+run = "pnpm --filter @workspace/whatsapp-blast run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/whatsapp-blast", "run", "build" ]
+publicDir = "artifacts/whatsapp-blast/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24101"
+BASE_PATH = "/"
