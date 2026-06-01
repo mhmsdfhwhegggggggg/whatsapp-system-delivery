@@ -2,8 +2,11 @@ import { pgTable, serial, text, integer, boolean, timestamp } from "drizzle-orm/
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
+import { usersTable } from "./users";
+
 export const sessionsTable = pgTable("sessions", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   phone: text("phone"),
   status: text("status").notNull().default("disconnected"), // disconnected | connecting | connected | banned

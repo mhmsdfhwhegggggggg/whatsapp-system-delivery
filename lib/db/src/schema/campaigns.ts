@@ -5,8 +5,11 @@ import { contactGroupsTable } from "./contacts";
 import { templatesTable } from "./templates";
 import { sessionsTable } from "./sessions";
 
+import { usersTable } from "./users";
+
 export const campaignsTable = pgTable("campaigns", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   templateId: integer("template_id").references(() => templatesTable.id, { onDelete: "set null" }),
   contactGroupId: integer("contact_group_id").references(() => contactGroupsTable.id, { onDelete: "set null" }),
