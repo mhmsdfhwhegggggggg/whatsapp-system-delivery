@@ -11,6 +11,7 @@ import makeWASocket, {
   proto,
   WASocket,
 } from "@whiskeysockets/baileys";
+import { SocksProxyAgent } from "socks-proxy-agent";
 // @hapi/boom is a transitive dep of baileys
 type BoomLike = { output?: { statusCode?: number } };
 const asBoom = (err: unknown): BoomLike => err as BoomLike;
@@ -53,12 +54,17 @@ export async function connectSession(sessionId: number): Promise<void> {
   const { state: authState, saveCreds } = await useMultiFileAuthState(authDir);
   const { version } = await fetchLatestBaileysVersion();
 
+  // Get session info for proxy
+  const [sessionInfo] = await db.select().from(sessionsTable).where(eq(sessionsTable.id, sessionId));
+  const agent = sessionInfo?.proxyUrl ? new SocksProxyAgent(sessionInfo.proxyUrl) : undefined;
+
   const sock = makeWASocket({
     version,
     auth: {
       creds: authState.creds,
       keys: makeCacheableSignalKeyStore(authState.keys, logger as any),
     },
+    agent, // Use proxy agent if configured
     printQRInTerminal: false,
     logger: logger as any,
     browser: ["WhatsBlast", "Chrome", "126.0"],

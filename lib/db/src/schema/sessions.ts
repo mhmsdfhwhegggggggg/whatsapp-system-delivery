@@ -11,6 +11,7 @@ export const sessionsTable = pgTable("sessions", {
   dailySentCount: integer("daily_sent_count").notNull().default(0),
   dailyLimit: integer("daily_limit").notNull().default(50),
   lastResetDate: text("last_reset_date"),
+  proxyUrl: text("proxy_url"), // e.g. socks5://user:pass@host:port
   // Warm-up system
   warmupMode: boolean("warmup_mode").notNull().default(true),
   warmupDay: integer("warmup_day").notNull().default(1),

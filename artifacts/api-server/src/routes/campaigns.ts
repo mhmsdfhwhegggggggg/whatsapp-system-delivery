@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { campaignsTable, messageLogsTable, contactsTable, templatesTable } from "@workspace/db";
 import { and, eq, sql } from "drizzle-orm";
+import { campaignQueue } from "../queues/config";
 import {
   CreateCampaignBody,
   GetCampaignParams,
@@ -147,8 +148,16 @@ router.post("/campaigns/:id/start", async (req, res) => {
       .set({ status: "running", startedAt: new Date(), totalCount: contacts.length })
       .where(eq(campaignsTable.id, parsed.data.id)).returning();
 
-    // Fire background sender
-    sendCampaign(parsed.data.id);
+    // Add all pending messages to the high-performance queue
+    const pendingLogs = await db.select().from(messageLogsTable)
+      .where(and(eq(messageLogsTable.campaignId, campaign.id), eq(messageLogsTable.status, "pending")));
+    
+    await campaignQueue.addBulk(
+      pendingLogs.map((log) => ({
+        name: `msg-${log.id}`,
+        data: { campaignId: campaign.id, messageLogId: log.id },
+      }))
+    );
 
     res.json(updated);
   } catch (err) {
