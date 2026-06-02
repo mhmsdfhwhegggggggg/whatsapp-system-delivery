@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "artifacts/api-server/src/index.ts" },
+    { "source": "/(.*)", "destination": "artifacts/whatsapp-blast/$1" }
+  ]
+}
