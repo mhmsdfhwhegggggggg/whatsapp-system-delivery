@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # API Server: Handles UI and user requests
+  api:
+    build: .
+    image: whatsapp-system-api
+    container_name: whatsapp-api
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    volumes:
+      - ./sessions:/app/artifacts/api-server/sessions
+    depends_on:
+      - redis
+
+  # Worker: Handles WhatsApp connections and sending (The Engine)
+  worker:
+    build: .
+    image: whatsapp-system-worker
+    container_name: whatsapp-worker
+    restart: always
+    command: pnpm --filter "./artifacts/api-server" run start:worker
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+    volumes:
+      - ./sessions:/app/artifacts/api-server/sessions
+    depends_on:
+      - redis
+      - api
+
+  # Redis: For Queue management
+  redis:
+    image: redis:7-alpine
+    container_name: whatsapp-redis
+    restart: always
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
+  sessions:
